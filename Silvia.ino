@@ -1,5 +1,10 @@
+#include <frequencyToNote.h>
+#include <MIDIUSB.h>
+#include <pitchToNote.h>
+
 #include <autotune.h>
 #include <microsmooth.h>
+
 
 //Arduino definition
 #define trigPin  5          // Trigger Pin
@@ -15,18 +20,13 @@
 
 //MIDI Definition
 void noteOn(byte channel, byte pitch, byte velocity) {
-  MIDIEvent noteOn = {0x09, 0x90 | channel, pitch, velocity};
-  MIDIUSB.write(noteOn);
+  midiEventPacket_t noteOn = {0x09, 0x90 | channel, pitch, velocity};
+  MidiUSB.sendMIDI(noteOn);
 }
 
 void noteOff(byte channel, byte pitch, byte velocity) {
-  MIDIEvent noteOff = {0x08, 0x80 | channel, pitch, velocity};
-  MIDIUSB.write(noteOff);
-}
-
-void controlChange(byte channel, byte control, byte value) {
-  MIDIEvent event = {0x0B, 0xB0 | channel, control, value};
-  MIDIUSB.write(event);
+  midiEventPacket_t noteOff = {0x08, 0x80 | channel, pitch, velocity};
+  MidiUSB.sendMIDI(noteOff);
 }
 
 //MUSIC NOTES ARRAY
@@ -139,20 +139,21 @@ void loop()
   intervalPotNote_o = intervalPotNote;
   intervalPotNote = istRead(intervalPotNote, analogRead(1), thresholdPotNote, 678, 0, 2, POTNOTE_TOTAL_NUMBER);
 
-  intervalPotScale = istRead(intervalPotScale, analogRead(0), thresholdPotScale, 678, 0, 2, SCALENOTE_TOTAL_NUMBER);
+  intervalPotScale = istRead(intervalPotScale, analogRead(0), thresholdPotScale, 678, 0, 2, POTSCALE_TOTAL_NUMBER);
 
   //intervals to values
-  firstNote_o = firstNote_o;
+  firstNote_o = firstNote;
   firstNote = 24 + intervalPotNote;
 
   //change firstnote
   if (intervalPotNote_o != intervalPotNote) {
     noteOff(1, firstNote_o, 125);
     noteOn(1, firstNote, 125);
-    MIDIUSB.flush();
-    delay(500);
+    MidiUSB.flush();
+    delay(50);
   }
 
 
 
 }
+
