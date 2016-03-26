@@ -43,22 +43,24 @@ int major[]             = {0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24}
 
 int* multiScales[POTSCALE_TOTAL_NUMBER] = {minor_pentatonic, major_pentatonic, minor_blues, major_blues, sol_arm_min, major};
 
+bool play = true;
+
 
 //Definition of the 3 analog measure we need, as interval, in such a way we can apply the isteresys function instead of the MAP function
 int intervalDistance = 0;
-int intervalDistance_o=0;
+int intervalDistance_o = 0;
 int intervalPotNote = 0;
-int intervalPotNote_o=0;
+int intervalPotNote_o = 0;
 int intervalPotScale = 0;
-int intervalPotScale_o=0;
+int intervalPotScale_o = 0;
 
 int thresholdDistance[NOTE_TOTAL_NUMBER];
 int thresholdPotNote[POTNOTE_TOTAL_NUMBER];
 int thresholdPotScale[POTSCALE_TOTAL_NUMBER];
 
-int istRead(int interval, int inputValue, int thresholdArray[], int inputMax, int inputMin, int ist, int intervalTotal){
+int istRead(int interval, int inputValue, int thresholdArray[], int inputMax, int inputMin, int ist, int intervalTotal) {
 
-  for (int z=0; z < intervalTotal; z++) {
+  for (int z = 0; z < intervalTotal; z++) {
     thresholdArray[z] = (z + 1) * (inputMax - inputMin) / intervalTotal + inputMin;
     if (z == interval) {
       thresholdArray[z] += ist;
@@ -71,7 +73,7 @@ int istRead(int interval, int inputValue, int thresholdArray[], int inputMax, in
     }
     else {
       for (int k = 1; k < intervalTotal; k++) {
-        if ((inputValue >= thresholdArray[k-1]) && (inputValue < thresholdArray[k])) {
+        if ((inputValue >= thresholdArray[k - 1]) && (inputValue < thresholdArray[k])) {
           interval = k;
         }
       }
@@ -113,13 +115,13 @@ int sma_vect;
 void setup()
 {
   //isteresys part
-  for (int i=0; i < NOTE_TOTAL_NUMBER; i++){
+  for (int i = 0; i < NOTE_TOTAL_NUMBER; i++) {
     thresholdDistance[i] = 0;
   }
-  for (int ii=0; ii < POTNOTE_TOTAL_NUMBER; ii++){
+  for (int ii = 0; ii < POTNOTE_TOTAL_NUMBER; ii++) {
     thresholdPotNote[ii] = 0;
   }
-  for (int iii=0; iii < POTSCALE_TOTAL_NUMBER; iii++){
+  for (int iii = 0; iii < POTSCALE_TOTAL_NUMBER; iii++) {
     thresholdPotScale[iii] = 0;
   }
 
@@ -145,7 +147,7 @@ void loop()
 {
 
   //read intervals
-  sma_vect = sma_filter(vect,histDistance);
+  sma_vect = sma_filter(vect, histDistance);
   intervalDistance_o = intervalDistance;
   intervalDistance = istRead(intervalDistance, sma_vect, thresholdDistance, DIST_MAX, DIST_MIN, 2, NOTE_TOTAL_NUMBER);
 
@@ -179,27 +181,36 @@ void loop()
     noteOn(1, musicNotesArray[0], 64);
     MidiUSB.flush();
     delay(100);
-    for (int p = 1; p < NOTE_TOTAL_NUMBER; p++){
-      noteOff(1, musicNotesArray[p-1], 64);
+    for (int p = 1; p < NOTE_TOTAL_NUMBER; p++) {
+      noteOff(1, musicNotesArray[p - 1], 64);
       noteOn(1, musicNotesArray[p], 64);
       MidiUSB.flush();
       delay(100);
     }
-    noteOff(1, musicNotesArray[NOTE_TOTAL_NUMBER-1], 64);
+    noteOff(1, musicNotesArray[NOTE_TOTAL_NUMBER - 1], 64);
     MidiUSB.flush();
     delay(100);
   }
-  
+
   //play
-  if ((intervalDistance_o > -1) && (intervalDistance > -1)){
-    noteOn(1, musicNotesArray[intervalDistance], 125);
-    if (intervalDistance_o != intervalDistance) {
-      noteOff(1, musicNotesArray[intervalDistance_o], 125);
-      noteOn(1, musicNotesArray[intervalDistance], 125);
+  if ((intervalDistance > -1) && (intervalDistance_o > -1)) {
+    if (play) {
+      play = false;
+      noteOn(1, musicNotesArray[intervalDistance], 64);
       MidiUSB.flush();
-      delay(100);
+    }
+    if (intervalDistance != intervalDistance_o) {
+      noteOff(1, musicNotesArray[intervalDistance_o], 64);
+      noteOn(1, musicNotesArray[intervalDistance], 64);
+      MidiUSB.flush();
+    }
+  }
+  else {
+    if (intervalDistance_o > -1) {
+      noteOff(1, musicNotesArray[intervalDistance_o], 64);
+      MidiUSB.flush();
+      play = true;
     }
   }
 
 }
-
