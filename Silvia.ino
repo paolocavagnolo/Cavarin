@@ -1,7 +1,6 @@
 #include <frequencyToNote.h>
 #include <MIDIUSB.h>
 #include <pitchToNote.h>
-
 #include <autotune.h>
 #include <microsmooth.h>
 
@@ -12,7 +11,7 @@
 
 //User definition
 #define NOTE_TOTAL_NUMBER 5           //min 1 max 14
-#define POTSCALE_TOTAL_NUMBER 5       //min max
+#define POTSCALE_TOTAL_NUMBER 6       //min max
 #define POTNOTE_TOTAL_NUMBER 12       //firstnote pot
 #define DIST_MIN 1                    //2cm*58.2 of a bottom dead bound
 #define DIST_MAX 40                   //50cm*58.2 of the upper limit
@@ -34,9 +33,20 @@ int firstNote = 0;
 int firstNote_o = 0;
 int musicNotesArray[NOTE_TOTAL_NUMBER];
 
+int minor_pentatonic[]  = {0, 3, 5, 7, 10, 12, 15, 17, 19, 22, 24, 27, 29, 31};
+int major_pentatonic[]  = {0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26, 28, 31};
+int minor_blues[]       = {0, 3, 5, 6, 7, 10, 12, 15, 17, 18, 19, 22, 24, 27};
+int major_blues[]       = {0, 2, 3, 4, 7, 9, 12, 14, 15, 16, 19, 21, 24, 26};
+int sol_arm_min[]       = {0, 1, 4, 5, 7, 8, 10, 12, 13, 16, 17, 19, 20, 22, 24};
+int major[]             = {0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24};
+
+int* multiScales[POTSCALE_TOTAL_NUMBER] = {minor_pentatonic, major_pentatonic, minor_blues, major_blues, sol_arm_min, major};
+
+
 //Definition of the 3 analog measure we need, as interval, in such a way we can apply the isteresys function instead of the MAP function
 int intervalDistance = 0;
 int intervalPotNote = 0;
+int intervalPotNote_o=0;
 int intervalPotScale = 0;
 
 int thresholdDistance[NOTE_TOTAL_NUMBER];
@@ -127,7 +137,6 @@ void setup()
   histDistance = ms_init(SMA);
 }
 
-int intervalPotNote_o=0;
 
 void loop()
 {
@@ -145,6 +154,10 @@ void loop()
   firstNote_o = firstNote;
   firstNote = 24 + intervalPotNote;
 
+  for (int c = 0; c < NOTE_TOTAL_NUMBER; c++) {
+    musicNotesArray[c] = firstNote + multiScales[intervalPotScale][c];
+  }
+
   //change firstnote
   if (intervalPotNote_o != intervalPotNote) {
     noteOff(1, firstNote_o, 125);
@@ -155,5 +168,6 @@ void loop()
 
 
 
-}
 
+
+}
