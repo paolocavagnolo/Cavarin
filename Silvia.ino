@@ -49,6 +49,8 @@ int istRead(int interval, int inputValue, int thresholdArray[], int inputMax, in
 }
 
 //Definition of the measurement from the sensor
+volatile float vect = -2;
+
 void read_distance(byte sensor_trig_pin, byte sensor_echo_pin) {
 
   long duration; // Duration used to calculate distance
@@ -64,14 +66,7 @@ void read_distance(byte sensor_trig_pin, byte sensor_echo_pin) {
   duration = pulseIn(sensor_echo_pin, HIGH, 100000);
 
   //Calculate the distance (in cm) based on the speed of sound.
-  distance = duration / 58.2;
-
-  if (!(distance >= MAXIMUM_RANGE || distance <= MINIMUM_RANGE)) {
-    vect = distance;
-  }
-  else {
-    vect = -1;
-  }
+  vect = duration / 58.2;
 }
 
 ISR(TIMER1_COMPA_vect)
