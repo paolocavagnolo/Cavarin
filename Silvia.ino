@@ -1,7 +1,4 @@
-#include <frequencyToNote.h>
 #include <MIDIUSB.h>
-#include <pitchToNote.h>
-#include <autotune.h>
 #include <microsmooth.h>
 
 float fscale( float originalMin, float originalMax, float newBegin, float
@@ -12,11 +9,11 @@ float fscale( float originalMin, float originalMax, float newBegin, float
 #define echoPin 2           // Echo Pin
 
 //User definition
-#define NOTE_TOTAL_NUMBER 5           //min 1 max 14
+#define NOTE_TOTAL_NUMBER 13           //min 1 max 14
 #define POTSCALE_TOTAL_NUMBER 6       //min max
-#define POTNOTE_TOTAL_NUMBER 12       //firstnote pot
+#define POTNOTE_TOTAL_NUMBER 36       //firstnote pot
 #define DIST_MIN 1                    //2cm*58.2 of a bottom dead bound
-#define DIST_MAX 40                   //50cm*58.2 of the upper limit
+#define DIST_MAX 50                   //50cm*58.2 of the upper limit
 #define IST 2                         //accuracy of the isteresys cycle on the 'distance to note interval'
 
 //MIDI Definition
@@ -200,8 +197,8 @@ void loop()
       MidiUSB.flush();
     }
     if (intervalDistance != intervalDistance_o) {
-      noteOff(1, musicNotesArray[intervalDistance_o], 64);
       noteOn(1, musicNotesArray[intervalDistance], 64);
+      noteOff(1, musicNotesArray[intervalDistance_o], 64);
       MidiUSB.flush();
     }
   }
