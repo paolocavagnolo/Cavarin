@@ -8,13 +8,13 @@
 //User definition
 #define NOTE_TOTAL_NUMBER 5           //min 1 max 14
 #define SCALE_TOTAL_NUMBER 5          //min max
-#define FIRSTNOTE_TOTAL_NUMBER 36     //firstnote pot
-#define DIST_MIN 2910                   //50cm*58.2 of a bottom dead bound
-#define DIST_MAX 5820                  //100cm*58.2 of the upper limit
+#define FIRSTNOTE_TOTAL_NUMBER 4     //firstnote pot
+#define DIST_MIN 1                   //2cm*58.2 of a bottom dead bound
+#define DIST_MAX 40                  //50cm*58.2 of the upper limit
 #define IST 2                         //accuracy of the isteresys cycle on the 'distance to note interval'
 
 
-
+int debug = 0;
 //Definition of the 3 analog measure we need, as interval, in such a way we can apply the isteresys function instead of the MAP function
 int intervalDistance = 0;
 int intervalPotNote = 0;
@@ -27,7 +27,7 @@ int thresholdPotScale[SCALE_TOTAL_NUMBER];
 int istRead(int interval, int inputValue, int thresholdArray[], int inputMax, int inputMin, int ist, int intervalTotal){
 
   for (int z=0; z < intervalTotal; z++) {
-    thresholdArray[z] = (z + 1) * (inputMax - (inputMin + 2)) / intervalTotal + inputMin;
+    thresholdArray[z] = (z + 1) * (inputMax - inputMin) / intervalTotal + inputMin;
     if (z == interval) {
       thresholdArray[z] += ist;
     }
@@ -46,8 +46,9 @@ int istRead(int interval, int inputValue, int thresholdArray[], int inputMax, in
     }
   }
   else {
-    return -1;
+    interval = -1;
   }
+  return interval;
 
 }
 
@@ -63,7 +64,7 @@ void read_distance(byte sensor_trig_pin, byte sensor_echo_pin) {
   delayMicroseconds(10);
 
   digitalWrite(sensor_trig_pin, LOW);
-  vect = pulseIn(sensor_echo_pin, HIGH, 100000);
+  vect = pulseIn(sensor_echo_pin, HIGH, 100000) / 58.2;
 
 }
 
@@ -103,11 +104,23 @@ void setup()
   sei();                          // enable global interrupts
 
   //microsmooth part
-  histDistance = ms_init(EMA);
+  histDistance = ms_init(SMA);
 }
+
+int sma_vect;
 
 void loop()
 {
-  //intervalDistance = istRead(intervalDistance, vect, thresholdDistance, DIST_MIN, DIST_MAX, NOTE_TOTAL_NUMBER);
-  int processed_value = ema_filter(channel_value, history);
+  sma_vect = sma_filter(vect,histDistance);
+  Serial.print(sma_vect);
+  Serial.print("\t");
+  //int istRead(int interval, int inputValue, int thresholdArray[], int inputMax, int inputMin, int ist, int intervalTotal)
+  for (int h=0;h < NOTE_TOTAL_NUMBER; h++) {
+    Serial.print(thresholdDistance[h]);
+    Serial.print("\t");
+  }
+  intervalDistance = istRead(intervalDistance, sma_vect, thresholdDistance, DIST_MAX, DIST_MIN, 2,NOTE_TOTAL_NUMBER);
+  Serial.println(intervalDistance);
+  
+
 }
