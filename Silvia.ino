@@ -4,6 +4,8 @@
 #include <autotune.h>
 #include <microsmooth.h>
 
+float fscale( float originalMin, float originalMax, float newBegin, float
+              newEnd, float inputValue, float curve);
 
 //Arduino definition
 #define trigPin  5          // Trigger Pin
@@ -151,7 +153,8 @@ void loop()
   intervalPotNote = istRead(intervalPotNote, analogRead(1), thresholdPotNote, 678, 0, 2, POTNOTE_TOTAL_NUMBER);
 
   intervalPotScale_o = intervalPotScale;
-  intervalPotScale = istRead(intervalPotScale, (int)fscale(0, 678, 0, 678, map(analogRead(0), 678, 0, 0, 678), 5), thresholdPotScale, 678, 0, 2, POTSCALE_TOTAL_NUMBER);
+  intervalPotScale = istRead(intervalPotScale, analogRead(0), thresholdPotScale, 678, 0, 5, POTSCALE_TOTAL_NUMBER);
+
 
   //intervals to values
   firstNote = 24 + intervalPotNote;
@@ -162,30 +165,31 @@ void loop()
 
   //change firstnote
   if (intervalPotNote_o != intervalPotNote) {
-    noteOn(1, firstNote, 125);
+    noteOn(1, firstNote, 64);
     MidiUSB.flush();
     delay(100);
-    noteOn(1, firstNote, 125);
+    noteOff(1, firstNote, 64);
     MidiUSB.flush();
 
   }
+
 
   //change scale
   if (intervalPotScale_o != intervalPotScale) {
-    noteOn(1, musicNotesArray[0], 125);
-    MIDIUSB.flush();
+    noteOn(1, musicNotesArray[0], 64);
+    MidiUSB.flush();
     delay(100);
     for (int p = 1; p < NOTE_TOTAL_NUMBER; p++){
-      noteOff(1, musicNotesArray[p-1], 125);
-      noteOn(1, musicNotesArray[p], 125);
-      MIDIUSB.flush();
+      noteOff(1, musicNotesArray[p-1], 64);
+      noteOn(1, musicNotesArray[p], 64);
+      MidiUSB.flush();
       delay(100);
     }
-    noteOff(1, musicNotesArray[NOTE_TOTAL_NUMBER-1], 125);
-    MIDIUSB.flush();
+    noteOff(1, musicNotesArray[NOTE_TOTAL_NUMBER-1], 64);
+    MidiUSB.flush();
     delay(100);
   }
-  /*
+  
   //play
   if ((intervalDistance_o > -1) && (intervalDistance > -1)){
     noteOn(1, musicNotesArray[intervalDistance], 125);
@@ -195,59 +199,7 @@ void loop()
       MidiUSB.flush();
       delay(100);
     }
-  }*/
+  }
 
 }
 
-float fscale( float originalMin, float originalMax, float newBegin, float
-              newEnd, float inputValue, float curve) {
-
-  float OriginalRange = 0;
-  float NewRange = 0;
-  float zeroRefCurVal = 0;
-  float normalizedCurVal = 0;
-  float rangedValue = 0;
-  boolean invFlag = 0;
-
-  if (curve > 10) curve = 10;
-  if (curve < -10) curve = -10;
-
-  curve = (curve * -.1) ; // - invert and scale - this seems more intuitive - postive numbers give more weight to high end on output
-  curve = pow(10, curve); // convert linear scale into lograthimic exponent for other pow function
-
-  // Check for out of range inputValues
-  if (inputValue < originalMin) {
-    inputValue = originalMin;
-  }
-  if (inputValue > originalMax) {
-    inputValue = originalMax;
-  }
-
-  // Zero Refference the values
-  OriginalRange = originalMax - originalMin;
-
-  if (newEnd > newBegin) {
-    NewRange = newEnd - newBegin;
-  }
-  else
-  {
-    NewRange = newBegin - newEnd;
-    invFlag = 1;
-  }
-
-  zeroRefCurVal = inputValue - originalMin;
-  normalizedCurVal  =  zeroRefCurVal / OriginalRange;   // normalize to 0 - 1 float
-
-  // Check for originalMin > originalMax  - the math for all other cases i.e. negative numbers seems to work out fine
-  if (originalMin > originalMax ) {
-    return 0;
-  }
-  if (invFlag == 0) {
-    rangedValue =  (pow(normalizedCurVal, curve) * NewRange) + newBegin;
-  }
-  else     // invert the ranges
-  {
-    rangedValue =  newBegin - (pow(normalizedCurVal, curve) * NewRange);
-  }
-  return rangedValue;
-}
