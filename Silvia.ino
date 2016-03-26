@@ -1,3 +1,6 @@
+#include <autotune.h>
+#include <microsmooth.h>
+
 //Arduino definition
 #define trigPin  5          // Trigger Pin
 #define echoPin 2           // Echo Pin
@@ -64,6 +67,9 @@ void read_distance(byte sensor_trig_pin, byte sensor_echo_pin) {
 
 }
 
+//microsmooth
+uint16_t *histDistance;
+
 ISR(TIMER1_COMPA_vect)
 {
   read_distance(trigPin, echoPin);
@@ -94,10 +100,14 @@ void setup()
   TCCR1B |= (1 << CS10);          // Set CS10 and CS12 bits for 1024 prescaler
   TCCR1B |= (1 << CS12);          // Set CS10 and CS12 bits for 1024 prescaler
   TIMSK1 |= (1 << OCIE1A);        // enable timer compare interrupt
-  sei();                          // enable global interrupts:
+  sei();                          // enable global interrupts
+
+  //microsmooth part
+  histDistance = ms_init(EMA);
 }
 
 void loop()
 {
-  intervalDistance = istRead(intervalDistance, vect, thresholdDistance, DIST_MIN, DIST_MAX, NOTE_TOTAL_NUMBER);
+  //intervalDistance = istRead(intervalDistance, vect, thresholdDistance, DIST_MIN, DIST_MAX, NOTE_TOTAL_NUMBER);
+  int processed_value = ema_filter(channel_value, history);
 }
