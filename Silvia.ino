@@ -6,8 +6,8 @@
 #define NOTE_TOTAL_NUMBER 5           //min 1 max 14
 #define SCALE_TOTAL_NUMBER 5          //min max
 #define FIRSTNOTE_TOTAL_NUMBER 36     //firstnote pot
-#define DIST_MIN 50                   //cm of a bottom dead bound
-#define DIST_MAX 100                  //cm of the upper limit
+#define DIST_MIN 2910                   //50cm*58.2 of a bottom dead bound
+#define DIST_MAX 5820                  //100cm*58.2 of the upper limit
 #define IST 2                         //accuracy of the isteresys cycle on the 'distance to note interval'
 
 
@@ -53,9 +53,6 @@ volatile float vect = -2;
 
 void read_distance(byte sensor_trig_pin, byte sensor_echo_pin) {
 
-  long duration; // Duration used to calculate distance
-  float distance;
-
   digitalWrite(sensor_trig_pin, LOW);
   delayMicroseconds(2);
 
@@ -63,10 +60,8 @@ void read_distance(byte sensor_trig_pin, byte sensor_echo_pin) {
   delayMicroseconds(10);
 
   digitalWrite(sensor_trig_pin, LOW);
-  duration = pulseIn(sensor_echo_pin, HIGH, 100000);
+  vect = pulseIn(sensor_echo_pin, HIGH, 100000);
 
-  //Calculate the distance (in cm) based on the speed of sound.
-  vect = duration / 58.2;
 }
 
 ISR(TIMER1_COMPA_vect)
