@@ -48,6 +48,7 @@ int intervalDistance = 0;
 int intervalPotNote = 0;
 int intervalPotNote_o=0;
 int intervalPotScale = 0;
+int intervalPotScale_o=0;
 
 int thresholdDistance[NOTE_TOTAL_NUMBER];
 int thresholdPotNote[POTNOTE_TOTAL_NUMBER];
@@ -148,6 +149,7 @@ void loop()
   intervalPotNote_o = intervalPotNote;
   intervalPotNote = istRead(intervalPotNote, analogRead(1), thresholdPotNote, 678, 0, 2, POTNOTE_TOTAL_NUMBER);
 
+  intervalPotScale_o = intervalPotScale;
   intervalPotScale = istRead(intervalPotScale, analogRead(0), thresholdPotScale, 678, 0, 2, POTSCALE_TOTAL_NUMBER);
 
   //intervals to values
@@ -166,8 +168,21 @@ void loop()
     delay(50);
   }
 
+  //change scale
+  if (intervalPotScale_o != intervalPotScale) {
+    noteOn(1, musicNotesArray[0], 125);
+    MIDIUSB.flush();
+    for (int p = 1; p < NOTE_TOTAL_NUMBER; p++){
+      delay(100);
+      noteOff(1, musicNotesArray[p-1], 125);
+      noteOn(1, musicNotesArray[p], 125);
+      MIDIUSB.flush();
+    }
+    noteOff(1, musicNotesArray[NOTE_TOTAL_NUMBER], 125);
+    MIDIUSB.flush();
+    delay(100);
 
-
+  }
 
 
 }
