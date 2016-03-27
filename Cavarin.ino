@@ -46,6 +46,7 @@ bool play = true;
 //Definition of the 3 analog measure we need, as interval, in such a way we can apply the isteresys function instead of the MAP function
 int intervalDistance = 0;
 int intervalDistance_o = 0;
+int DistanceOld = 0;
 
 int intervalPotNote = 0;
 int intervalPotNote_o = 0;
@@ -56,8 +57,6 @@ int PotNoteOld = 0;
 int intervalPotScale = 0;
 int intervalPotScale_o = 0;
 bool PotScalePlay = false;
-long PotScaleTime = 0;
-int PotScaleOld = 0;
 
 int thresholdDistance[NOTE_TOTAL_NUMBER];
 int thresholdPotNote[POTNOTE_TOTAL_NUMBER];
@@ -209,11 +208,10 @@ void loop()
       }
     }
 
-    MidiUSB.flush();
-
-    if (intervalDistance_o != intervalDistance) {
+    else if (intervalDistance_o != intervalDistance) {
       if (intervalDistance_o == -1){
         noteOn(1, musicNotesArray[intervalDistance], 64);
+        DistanceOld = intervalDistance;
       }
       else if (intervalDistance == -1){
         noteOff(1, musicNotesArray[intervalDistance_o], 64);
@@ -221,7 +219,9 @@ void loop()
       else {
         noteOff(1, musicNotesArray[intervalDistance_o], 64);
         noteOn(1, musicNotesArray[intervalDistance], 64);
+        DistanceOld = intervalDistance;
       }
+      noteOff(1, musicNotesArray[DistanceOld], 64);
     }
 
     MidiUSB.flush();
