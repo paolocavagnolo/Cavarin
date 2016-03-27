@@ -171,7 +171,7 @@ void loop()
   //values to midi
     //  POT NOTES
     if (intervalPotNote_o != intervalPotNote) {
-      noteOff(1, musicNotesArray[DistanceOld], 64);
+      noteOff(1, DistanceOld, 64);
       if (!PotNotePlay){
         PotNoteOld = firstNote;
         noteOn(1, PotNoteOld, 64);
@@ -191,7 +191,7 @@ void loop()
     }
     //  POT SCALES
     else if (intervalPotScale_o != intervalPotScale) {
-      noteOff(1, musicNotesArray[DistanceOld], 64);
+      noteOff(1, DistanceOld, 64);
       PotScalePlay = true;
       while (PotScalePlay) {
         noteOn(1, musicNotesArray[0], 64);
@@ -213,7 +213,7 @@ void loop()
     else if (intervalDistance_o != intervalDistance) {
       if (intervalDistance_o == -1){
         noteOn(1, musicNotesArray[intervalDistance], 64);
-        DistanceOld = intervalDistance;
+        DistanceOld = musicNotesArray[intervalDistance];
       }
       else if (intervalDistance == -1){
         noteOff(1, musicNotesArray[intervalDistance_o], 64);
@@ -221,7 +221,7 @@ void loop()
       else {
         noteOff(1, musicNotesArray[intervalDistance_o], 64);
         noteOn(1, musicNotesArray[intervalDistance], 64);
-        DistanceOld = intervalDistance;
+        DistanceOld = musicNotesArray[intervalDistance];
       }
     }
 
