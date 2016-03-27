@@ -209,14 +209,16 @@ void loop()
       }
     }
 
-    else if (intervalDistance_o != intervalDistance) {
+    MidiUSB.flush();
+
+    if (intervalDistance_o != intervalDistance) {
       if (intervalDistance_o == -1){
         noteOn(1, musicNotesArray[intervalDistance], 64);
       }
       else if (intervalDistance == -1){
         noteOff(1, musicNotesArray[intervalDistance_o], 64);
       }
-      else if {
+      else {
         noteOff(1, musicNotesArray[intervalDistance_o], 64);
         noteOn(1, musicNotesArray[intervalDistance], 64);
       }
