@@ -46,8 +46,13 @@ bool play = true;
 //Definition of the 3 analog measure we need, as interval, in such a way we can apply the isteresys function instead of the MAP function
 int intervalDistance = 0;
 int intervalDistance_o = 0;
+
 int intervalPotNote = 0;
 int intervalPotNote_o = 0;
+bool firstNotePlay = false;
+long firstNoteTime = 0;
+int firstNoteOld = 0;
+
 int intervalPotScale = 0;
 int intervalPotScale_o = 0;
 
@@ -166,20 +171,23 @@ void loop()
 
     if (intervalPotNote_o != intervalPotNote) {
       if (!firstNotePlay){
-        noteOn(1, firstNote, 64);
+        firstNoteOld = firstNote;
+        noteOn(1, firstNoteOld, 64);
         firstNotePlay = true;
-        long firstNoteTime = millis();
+        firstNoteTime = millis();
         intervalPotNote = intervalPotNote_o;
       }
       else {
-        if ((millis() - firstNoteTime) > 200) {
-          noteOff(1, firstNote, 64);
+        if ((millis() - firstNoteTime) > 100) {
+          noteOff(1, firstNoteOld, 64);
+          firstNotePlay = false;
         }
         else {
           intervalPotNote = intervalPotNote_o;
         }
       }
     }
+    
     else if (intervalPotScale_o != intervalPotScale) {
     }
     else if (intervalDistance_o != intervalDistance) {
@@ -190,3 +198,4 @@ void loop()
     //if not, stay relax
 
 }
+
