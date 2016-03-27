@@ -49,12 +49,15 @@ int intervalDistance_o = 0;
 
 int intervalPotNote = 0;
 int intervalPotNote_o = 0;
-bool firstNotePlay = false;
-long firstNoteTime = 0;
-int firstNoteOld = 0;
+bool PotNotePlay = false;
+long PotNoteTime = 0;
+int PotNoteOld = 0;
 
 int intervalPotScale = 0;
 int intervalPotScale_o = 0;
+bool PotScalePlay = false;
+long PotScaleTime = 0;
+int PotScaleOld = 0;
 
 int thresholdDistance[NOTE_TOTAL_NUMBER];
 int thresholdPotNote[POTNOTE_TOTAL_NUMBER];
@@ -167,29 +170,45 @@ void loop()
   }
 
   //values to midi
-    //if something had happen, do thing
-
+    //  POT NOTES
     if (intervalPotNote_o != intervalPotNote) {
-      if (!firstNotePlay){
-        firstNoteOld = firstNote;
-        noteOn(1, firstNoteOld, 64);
-        firstNotePlay = true;
-        firstNoteTime = millis();
+      if (!PotNotePlay){
+        PotNoteOld = firstNote;
+        noteOn(1, PotNoteOld, 64);
+        PotNotePlay = true;
+        PotNoteTime = millis();
         intervalPotNote = intervalPotNote_o;
       }
       else {
-        if ((millis() - firstNoteTime) > 100) {
-          noteOff(1, firstNoteOld, 64);
-          firstNotePlay = false;
+        if ((millis() - PotNoteTime) > 100) {
+          noteOff(1, PotNoteOld, 64);
+          PotNotePlay = false;
         }
         else {
           intervalPotNote = intervalPotNote_o;
         }
       }
     }
-    
+    //  POT SCALES
     else if (intervalPotScale_o != intervalPotScale) {
+      PotScalePlay = true;
+      while (PotScalePlay) {
+        noteOn(1, musicNotesArray[0], 64);
+        MidiUSB.flush();
+        delay(100);
+        for (int p = 1; p < NOTE_TOTAL_NUMBER; p++) {
+          noteOff(1, musicNotesArray[p - 1], 64);
+          noteOn(1, musicNotesArray[p], 64);
+          MidiUSB.flush();
+          delay(100);
+        }
+        noteOff(1, musicNotesArray[NOTE_TOTAL_NUMBER - 1], 64);
+        MidiUSB.flush();
+        delay(100);
+        PotScalePlay = false;
+      }
     }
+
     else if (intervalDistance_o != intervalDistance) {
     }
 
@@ -198,4 +217,3 @@ void loop()
     //if not, stay relax
 
 }
-
