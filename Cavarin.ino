@@ -171,8 +171,8 @@ void loop()
   //values to midi
     //  POT NOTES
     if (intervalPotNote_o != intervalPotNote) {
-      noteOff(1, DistanceOld, 64);
       if (!PotNotePlay){
+        noteOff(1, DistanceOld, 64);
         PotNoteOld = firstNote;
         noteOn(1, PotNoteOld, 64);
         PotNotePlay = true;
@@ -219,14 +219,13 @@ void loop()
         noteOff(1, musicNotesArray[intervalDistance_o], 64);
       }
       else {
-        noteOff(1, musicNotesArray[intervalDistance_o], 64);
         noteOn(1, musicNotesArray[intervalDistance], 64);
+        MidiUSB.flush(); //just for legato
+        noteOff(1, musicNotesArray[intervalDistance_o], 64);
         DistanceOld = musicNotesArray[intervalDistance];
       }
     }
 
     MidiUSB.flush();
-
-    //if not, stay relax
 
 }
