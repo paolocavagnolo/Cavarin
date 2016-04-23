@@ -2,7 +2,16 @@
 an ADO instruments
 
 ## Hardware
-Buy some stuff
+- 1x Arduino Leonardo
+- 2x Potentiometer - Linear - 10k
+- 1x HC-SR04
+- 4x long thin cables ~60cm
+- 4x short thin cables ~50cm
+
+
+
+
+
 
 ## Software
 Download Arduino from arduino.cc
